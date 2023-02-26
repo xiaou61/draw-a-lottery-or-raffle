@@ -1,0 +1,216 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>转盘</title>
+
+    <style type="text/css">
+        body {
+            text-align: center;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .box {
+            width: 500px;
+            height: 500px;
+            margin: 10px auto;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            border: 5px solid black;
+            border-radius: 50%;
+            background: rgba(128, 128, 128, 0.49);
+            overflow: hidden;
+            position: relative;
+            transition: all 3s cubic-bezier(0.46, 0.03, 0.52, 0.96);
+        }
+
+        .pointer {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9;
+        }
+
+        .pointer-bar {
+            width: 60px;
+            height: 25px;
+            background: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(0, -50%);
+        }
+
+        .pointer-cursor {
+            width: 25px;
+            height: 25px;
+            position: absolute;
+            left: 85px;
+            top: 50%;
+            transform: translate(-50%, -50%) rotateZ(45deg);
+            background: white;
+        }
+
+        .part {
+            height: 100%;
+            width: 50%;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .bg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .title {
+            transform: translate(0, -50%);
+            transform-origin: left top;
+            width: 100%;
+            height: auto;
+            text-align: center;
+            font-size: 20px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            padding-left: 85px;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .winner {
+            font-size: 30px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+<div class="box">
+    <div class="main" ontransitionend="end()">
+        <div id="temp" class="part" style="display: none;">
+            <div class="bg"></div>
+            <div class="title"></div>
+        </div>
+    </div>
+
+    <div class="pointer">
+        <div class="pointer-bar"></div>
+        <div class="pointer-cursor"></div>
+    </div>
+</div>
+
+<button onclick="start()">开始</button>
+<div class="winner"></div>
+
+<script type="text/javascript">
+    var indexs=0
+    var arr = [
+        "看看腿",
+        "喘一下",
+        "撒娇",
+        "请我吃好吃的",
+        "给我100块钱",
+        "给我唱歌",
+        "陪我玩游戏",
+        "可以命令你一分钟",
+        "给他跳可爱的舞蹈",
+        "夸夸我",
+        "看看脸蛋",
+        "写一篇小作文"
+    ]
+    var rotate = 0;
+
+    var random = function (num) {
+        return Math.random() * num;
+    };
+
+    var randomColor = function () {
+        return 'rgb(' + random(250) + ', ' + random(250) + ', ' + random(250) + ')';
+    };
+
+    var list = new Array(12).fill(0).map(function (o, i) {
+        return {
+            title: 'item' + (i + 1),
+            color: randomColor()
+        };
+    });
+
+    var perAngle = 360 / list.length;
+
+    var main = document.querySelector('.main');
+    var temp = document.querySelector('#temp');
+
+    for (var i in list) {
+
+        var item = list[i];
+
+        var newNode = temp.cloneNode(true);
+        newNode.style.display = 'block';
+        newNode.style.transform = 'rotateZ(' + (perAngle * i + perAngle / 2) + 'deg)';
+        newNode.querySelector('.bg').style.background = item.color;
+
+        if (list.length > 2) {
+            var p = this.perAngle / 2; // 每份的角度两等分
+            var d = Math.tan(p * Math.PI / 180) * 100; // 对边的长度
+            var x = (100 - d) / 2; // 每份对边实际百分比
+            newNode.style.clipPath = `polygon(0% 50%, 100% ${x}%, 100% ${100 - x}%)`;
+        }
+
+        newNode.querySelector('.title').innerHTML = arr[indexs];
+        indexs++
+
+        main.appendChild(newNode);
+    }
+
+    var isRunning = false;
+
+    function start() {
+        if (isRunning) {
+            console.warn('isRunning');
+            return;
+        }
+
+        isRunning = true;
+
+        document.querySelector('.winner').innerHTML = '';
+
+        rotate += random(360) + 360 * 3; // 多转3圈
+
+        main.style.transform = 'rotateZ(-' + rotate + 'deg)';
+    }
+
+    function end() {
+        isRunning = false;
+        console.log(rotate);
+         var index = Math.floor(rotate / perAngle) % list.length;
+         var winner = arr[index];
+         document.querySelector('.winner').innerHTML = '中奖：' + winner;
+    }
+</script>
+</body>
+</html>
+
